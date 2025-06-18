@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# List of Pokémon
+pokemon_list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+
+# Base URL
+base_url="https://pokeapi.co/api/v2/pokemon"
+
+# Loop through each Pokémon
+for name in "${pokemon_list[@]}"; do
+    # Define output file
+    file="${name}.json"
+
+    # Fetch and save
+    echo "Fetching data for $name..."
+    curl -s -f "${base_url}/${name}" -o "$file"
+
+    # Check if the request failed
+    if [ $? -ne 0 ]; then
+        echo "[$(date)] Failed to fetch data for $name" >> errors.txt
+    else
+        echo "Saved to $file"
+    fi
+
+    # Delay to avoid rate-limiting (sleep 1 second)
+    sleep 1
+done
+
