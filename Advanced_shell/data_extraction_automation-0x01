@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# Ensure data.json exists
+# Ensure the JSON file exists
 if [ ! -f data.json ]; then
-  echo "data.json not found. Please run the fetch script first."
+  echo "data.json not found."
   exit 1
 fi
 
-# Extract data using jq
-name=$(jq -r '.name' data.json | sed 's/.*/\u&/')  # Capitalize first letter
-height=$(jq -r '.height' data.json | awk '{ printf "%.1f", $1 / 10 }')  # Convert dm to m
-weight=$(jq -r '.weight' data.json | awk '{ printf "%d", $1 / 10 }')  # Convert hg to kg
-type=$(jq -r '.types[0].type.name' data.json | sed 's/.*/\u&/')  # Capitalize first letter
+# Extract values using jq, format using awk and sed
+name=$(jq -r '.name' data.json | sed 's/.*/\u&/')
+type=$(jq -r '.types[0].type.name' data.json | sed 's/.*/\u&/')
+height=$(jq -r '.height' data.json | awk '{ printf "%.1f", $1 / 10 }')
+weight=$(jq -r '.weight' data.json | awk '{ printf "%d", $1 / 10 }')
 
-# Print formatted string
+# Print the formatted sentence
 echo "$name is of type $type, weighs ${weight}kg, and is ${height}m tall."
 
