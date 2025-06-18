@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# List of Pokémon
+pokemon_list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+base_url="https://pokeapi.co/api/v2/pokemon"
+
+# Error log
+error_log="errors.txt"
+> "$error_log"  # Clear previous errors
+
+# Function to fetch a single Pokémon's data
+fetch_pokemon() {
+    name=$1
+    file="${name}.json"
+    
+    echo "Fetching $name..."
+    curl -s -f "${base_url}/${name}" -o "$file"
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ $name fetched successfully."
+    else
+        echo "❌ Failed to fetch $name" >> "$error_log"
+    fi
+}
+
+# Export the function so it's available to subshells
+export -f fetch_pokemon
+export base_url error_log
+
+# Loop through Pokémon and fetch in parallel
+for name in "${pokemon_list[@]}"; do
+    fetch_pokemon "$name" &
+done
+
+# Wait for all background jobs to complete
+wait
+
+echo "✅ All fetch operations completed."
+
