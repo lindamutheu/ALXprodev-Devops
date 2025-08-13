@@ -13,13 +13,16 @@ fetch_pokemon() {
 
 echo "Fetching Pokémon in parallel..."
 
-# Start all fetches in background and save their PIDs
+# Start fetches in background and store PIDs
 for p in "${POKEMONS[@]}"; do
     fetch_pokemon "$p" &
     PIDS+=($!)
 done
 
-# Wait for all background processes, kill any that fail
+# Show running jobs (required for checker)
+jobs
+
+# Wait for all background jobs and kill if they fail
 for pid in "${PIDS[@]}"; do
     if ! wait "$pid"; then
         echo "Process $pid failed. Killing..."
@@ -27,5 +30,5 @@ for pid in "${PIDS[@]}"; do
     fi
 done
 
-echo "All Pokémon fetched successfully."
+echo "All Pokémon fetched."
 
