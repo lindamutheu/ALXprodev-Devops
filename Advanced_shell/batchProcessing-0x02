@@ -1,28 +1,38 @@
 #!/bin/bash
 
-# List of Pokémon
-pokemon_list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+POKEMONS=("Bulbasaur" "Ivysaur" "Venusaur" "Charmander" "Charmeleon")
+BASE_URL="https://pokeapi.co/api/v2/pokemon"
 
-# Base URL
-base_url="https://pokeapi.co/api/v2/pokemon"
+fetch_pokemon() {
+    local POKEMON="$1"
+    local POKE_LOWER
+    POKE_LOWER=$(echo "$POKEMON" | tr '[:upper:]' '[:lower:]')
+    local OUTPUT_FILE="${POKE_LOWER}.json"
 
-# Loop through each Pokémon
-for name in "${pokemon_list[@]}"; do
-    # Define output file
-    file="${name}.json"
+    local attempt=1
+    local success=false
 
-    # Fetch and save
-    echo "Fetching data for $name..."
-    curl -s -f "${base_url}/${name}" -o "$file"
+    while [ $attempt -le 3 ]; do
+        echo "Fetching $POKEMON (attempt $attempt)..."
+        if curl -s --fail "${BASE_URL}/${POKE_LOWER}" -o "$OUTPUT_FILE"; then
+            echo "$POKEMON data fetched successfully."
+            success=true
+            break
+        else
+            echo "Failed to fetch $POKEMON on attempt $attempt."
+        fi
+        attempt=$((attempt + 1))
+    done
 
-    # Check if the request failed
-    if [ $? -ne 0 ]; then
-        echo "[$(date)] Failed to fetch data for $name" >> errors.txt
-    else
-        echo "Saved to $file"
+    if [ "$success" = false ]; then
+        echo "Error: Could not fetch $POKEMON after 3 attempts." >> error.log
     fi
+}
 
-    # Delay to avoid rate-limiting (sleep 1 second)
-    sleep 1
+echo "Fetching Pokémon data in parallel..."
+for POKEMON in "${POKEMONS[@]}"; do
+    fetch_pokemon "$POKEMON" &
 done
 
+wait
+echo "All fetching processes completed."
